@@ -26,7 +26,6 @@ int RUN_LOG_csv(void)
             break; // 如果没有读取到预期的字节数，退出循环
         }
         // 处理读取到的数据
-
         memcpy(&RUNLOG_Data, &ch_get, 100);
         memset(&ch_get, 0, 100);
 #if 1
