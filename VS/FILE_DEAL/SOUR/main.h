@@ -39,43 +39,8 @@ public:
     }
 
 };
-// 假设你有一个数据结构来存储数据
-struct Data_relog {
-    uint8_t start_year;
-    uint8_t start_month;
-    uint8_t start_day;
-    uint8_t start_hour;
-    uint8_t start_min;
-    uint8_t start_sec;
-
-    uint8_t end_year;
-    uint8_t end_month;
-    uint8_t end_day;
-    uint8_t end_hour;
-    uint8_t end_min;
-    uint8_t end_sec;
-
-    unsigned char AHI;      //14
-    unsigned char OAI;      //15
-    unsigned char CAI;      //16
-    unsigned char HI;       //17
-    unsigned char SI;       //鼾声指数18
-    unsigned char FL;       //气流受限19
-    unsigned char RERA;      //觉醒指数呼吸努力度20
-    unsigned char CSR;      //周期性呼吸 陈氏呼吸21
-    unsigned char AvgLeak; //平均漏气量 22
-    unsigned char AvgP; //平均压力  P=Value*0.5   23
-    unsigned char MinSPO2; //最小血氧 24
-
-    unsigned char AvgSPO2; //平均血氧 25
-    unsigned char MaxPR; //最大脉率 26
-    unsigned char MinPR; //最小脉率 27
-    unsigned short TCount; //使用时间 28 29
-    unsigned short TTreat; //治疗时间 30 31
-    unsigned char SN[16];  //sn号 32-47
-    unsigned short SetCount; //参数修改次数48 49
-};
-
+#define STORE_SIGNAL 1
+#define STORE_DOUBLE 0
 
 // 假设你有一个数据结构来存储数据
 struct Data_Run_log {
