@@ -90,15 +90,8 @@ int D_file_csv(void)
         }
         else
         {
-
         }
-    
-
-
-
     }
-
-
     FileHandler::D_FILE_DATA.close(); // 关闭文件
     file_D_DATA_csv.close(); // 关闭文件
     return 1;
