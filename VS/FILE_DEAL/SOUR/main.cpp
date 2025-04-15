@@ -1,116 +1,79 @@
 #include <iostream>
-#include <fstream>
 #include <filesystem>
-#include <stdio.h> 
-#include <vector>
-#include <string>
-#include "main.h"
+#include <fstream>
 
-std::string filePath = "OUT/laohua.bys"; // 替换为你的文件路径
-std::ifstream FileHandler::FILE_AGING_LOG; // 定义静态成员变量
-
-std::string filePath1 = "OUT/summer.bys"; // 替换为你的文件路径
-std::ifstream FileHandler::SUMMER_DATA; // 定义静态成员变量
-
-std::string M_FILE_PATH = "OUT/0100040m.bys"; // 替换为你的文件路径
-std::ifstream FileHandler::M_FILE_DATA; // 定义静态成员变量
-
-std::string D_FILE_PATH = "OUT/0100002d.bys"; // 替换为你的文件路径
-std::ifstream FileHandler::D_FILE_DATA; // 定义静态成员变量
-
-std::string RUN_LOG_PATH = "OUT/RunLog.bys"; // 替换为你的文件路径
-std::ifstream FileHandler::RUN_LOG; // 定义静态成员变量
-
-int return_get;
+const char* RUNLOG_TABLE_name = { "\"目录\",\"文件名\",\"大小\",\"单位\"\n" };
 namespace fs = std::filesystem;
-int main()
-{
-    // ... 更多数据
-
-    if (FileHandler::OPEN_AGING_File(filePath))
+std::ofstream file_DATA_csv("./Fast_store_Release.csv");
+void processFile(const fs::path& filePath) {
+    // 打开文件
+    std::ifstream file(filePath);
+    if (!file.is_open())
     {
-        AGING_FILE_csv();
+        file_DATA_csv << "文件被损坏 " << filePath << "\r\n";
+        return;
     }
-    if (FileHandler::OPEN_SUMMER_File(filePath1))
+    // 获取文件大小
+    std::streamsize fileSize = file.tellg();
+    file.seekg(0, std::ios::end);
+    fileSize = file.tellg() - fileSize;
+    if (fileSize == 0)
     {
-        summer_csv();
+        file_DATA_csv << " 0 KB" << "\n";
     }
-  
-    if (FileHandler::OPEN_RUN_LOG_File(RUN_LOG_PATH))
-    {
-        RUN_LOG_csv();
-    }
-# if 0
-    if (FileHandler::OPEN_M_DATA_File(filePath2))
-    {
-        m_file_csv();
-    }
-#endif
-
     else
     {
-        fs::path dir_path = "OUT";  // 替换为实际的目录路径
-        std::string str1  = "OUT/";  // 替换为实际的目录路径
-        if (fs::exists(dir_path) && fs::is_directory(dir_path)) 
+        file_DATA_csv << (fileSize + 1024) / 1024 << "," << "KB" << "\n";
+    }
+
+    // 关闭文件
+    file.close();
+}
+
+void processDirectory(const fs::path& directoryPath)
+{
+    
+    if (!file_DATA_csv.is_open())
+    {
+        std::cerr << "Failed to open file for writing." << std::endl;
+        return;
+    }
+    else
+    {
+        file_DATA_csv << RUNLOG_TABLE_name;
+        // 检查路径是否存在且是一个目录
+        if (!fs::exists(directoryPath) || !fs::is_directory(directoryPath))
         {
-            for (const auto& entry : fs::directory_iterator(dir_path)) 
+            std::cerr << "路径不存在或不是一个目录: " << directoryPath << std::endl;
+            return;
+        }
+        std::cout<< "加速存储数据分析 \r\n" ;
+        // 遍历目录中的所有条目
+        for (const auto& entry : fs::recursive_directory_iterator(directoryPath))
+        {
+            fs::path fileName_1 = entry.path().filename();
+            if (entry.is_directory())
             {
-                str1.clear();
-                str1 += "OUT/";
-                if (!(fs::is_regular_file(entry)))
-                {
-                    break;
-                }
-
-                std::string filename = entry.path().filename().string();
-                // 查找文件扩展名的位置
-                size_t dot_pos = filename.rfind('.');
-                // 如果找到了扩展名且扩展名长度大于1
-                if (dot_pos != std::string::npos && dot_pos < filename.size() - 1)
-                {
-                    std::string extension = filename.substr(dot_pos + 1);  // 获取扩展名
-
-                    if (extension == "csv")
-                    {
-                        continue;
-                    }
-                    if ((extension.size() > 1)&&(filename.size()>extension.size()&&(filename.size()>5)))
-                    {
-                        std::cout<< filename[filename.size() - extension.size()-2] << std::endl;  // 获取扩展名倒数第二个字符
-                        if (filename[filename.size() - extension.size() - 2] == 'm')
-                        {
-                            str1 += filename;
-                            M_FILE_PATH = str1;
-                            if (FileHandler::OPEN_M_DATA_File(M_FILE_PATH))
-                            {
-                                return_get= m_file_csv();
-                            }
-                        }
-                        if (filename[filename.size() - extension.size() - 2] == 'd')
-                        {
-                            str1 += filename;
-                            D_FILE_PATH = str1;
-                            //memcpy(&D_FILE_PATH, &str1, sizeof(D_FILE_PATH));
-                            if (FileHandler::OPEN_D_DATA_File(D_FILE_PATH))
-                            {
-                                return_get = D_file_csv();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        return 0;  // 如果文件名太短，返回空字符
-                    }
-                }
+                //file_DATA_csv << entry.path() << ",";
+                // 递归处理子目录
+                // processDirectory(entry.path());
+            }
+            if (entry.is_regular_file())
+            {
+                file_DATA_csv << entry.path() << ",";
+                file_DATA_csv << fileName_1 << ",";
+                processFile(entry.path());
             }
         }
-        else
-        {
-            std::cerr << "Directory does not exist or is not a valid directory." << std::endl;
-        }
-        std::cerr << "Failed to open the file: " << filePath << std::endl;
-        return 1;
     }
+}
+
+int main() {
+    // 指定文件夹路径
+    fs::path directoryPath = "H:/";
+
+    // 处理指定目录
+    processDirectory(directoryPath);
 
     return 0;
 }
