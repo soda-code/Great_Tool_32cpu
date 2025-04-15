@@ -23,7 +23,7 @@ int AGING_FILE_csv(void)
 
     // 逐字符读取文件内容
 
-    int temp_data[3] = { 0 };
+    uint16_t temp_data[3] = { 0 };
     long tick_fila = 0;
     for (size_t i = 0; ; ++i)
     {
